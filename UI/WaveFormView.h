@@ -32,29 +32,44 @@ class WaveFormView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit WaveFormView(QWidget *parent = nullptr);
+    explicit WaveFormView(QWidget *_parent = nullptr);
     virtual ~WaveFormView() override;
 
-    void setScrollBar(QScrollBar* scrollBar);
-    void setSignal(Signal* signal);
+    void setSignal(Signal* _signal);
+    void setCursorSample(int _cursorTime);
+
+    inline int getSampleOffset() { return m_sampleOffset; }
+    inline int getNbSampleViewed() { return m_nbSampleViewed; }
+    int getNbTotalSample();
+
+    void setNbSampleViewed(int _nbSampleViewed);
+
+    void setZoomMin(qreal _value);
+    void setZoomMax(qreal _value);
+    void setZoom(qreal _value);
 
 public slots:
-    virtual void resizeEvent(QResizeEvent* event) override;
-    virtual void paintEvent(QPaintEvent* event) override;
-    virtual void wheelEvent(QWheelEvent* event) override;
+    virtual void resizeEvent(QResizeEvent* _event) override;
+    virtual void paintEvent(QPaintEvent* _event) override;
+    virtual void wheelEvent(QWheelEvent* _event) override;
 
-    void setSampleOffset(int startIndex);
+    void setSampleOffset(int _startIndex);
     void updateSignal();
+
+signals:
+    void zoomChanged();
 
 protected:
     void updateAllChunks();
-    void updateScrollBar(int _localOffset = 0);
+    void updateZoom(int _localOffset = 0);
+    void updateView();
+    void updateChunkList();
 
 private:
     int m_sampleOffset;
     int m_nbSampleViewed;
-    int m_nbTotalSample;
     int m_samplePerChunk;
+    int m_cursorSample;
 
     qreal m_zoom;
     qreal m_zoomMin;
@@ -62,9 +77,8 @@ private:
 
     QList<WaveFormChunk*> m_chunkList;
 
-    QScrollBar* m_scrollBar;
-
     Signal* m_signal;
+    bool m_firstUpdate;
 
     static const int chunkSize;
 };

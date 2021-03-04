@@ -27,8 +27,8 @@
 #include "WAVFormat.h"
 #include "LoopableBuffer.h"
 
-Signal::Signal(QObject *parent)
-    : QObject(parent),
+Signal::Signal(QObject *_parent)
+    : QObject(_parent),
       m_duration(1.0),
       m_audio(nullptr),
       m_samples(nullptr),
@@ -39,6 +39,7 @@ Signal::Signal(QObject *parent)
 
     int totalSample = 1 * m_sampleRate;
     m_samples = new QByteArray(totalSample, NULL);
+    m_cursorSample = 0;
 
     QAudioFormat format;
     // Set up the format, eg.
@@ -93,11 +94,11 @@ Signal::~Signal()
     delete m_samples;
 }
 
-void Signal::setVolume(qreal volume)
+void Signal::setVolume(qreal _volume)
 {
     if(m_audio != nullptr)
     {
-        qreal linearVolume = QAudio::convertVolume(volume,
+        qreal linearVolume = QAudio::convertVolume(_volume,
                                                 QAudio::LogarithmicVolumeScale,
                                                 QAudio::LinearVolumeScale);
         m_audio->setVolume(linearVolume);
@@ -122,13 +123,18 @@ int Signal::sampleCount()
     return 0;
 }
 
-qint32 Signal::getSample(int index)
+qint32 Signal::getSample(int _index)
 {
-    if(m_samples != nullptr && index * 4 >= 0 && index * 4 <= m_samples->size() - 4)
+    if(m_samples != nullptr && _index * 4 >= 0 && _index * 4 <= m_samples->size() - 4)
     {
-        return qFromLittleEndian<qint32>(m_samples->constData() + (index * 4));
+        return qFromLittleEndian<qint32>(m_samples->constData() + (_index * 4));
     }
     return 0;
+}
+
+void Signal::setCursorTime(qreal _cursorTime)
+{
+    m_cursorSample = qRound(_cursorTime * m_sampleRate);
 }
 
 void Signal::generate()
@@ -160,15 +166,15 @@ void Signal::generate()
     emit signalChanged();
 }
 
-void Signal::exportWAV(QString fileName)
+void Signal::exportWAV(QString _fileName)
 {
     WAVFormat wav(1, 1, m_sampleRate, 32);
-    wav.writeToFile(fileName, m_samples);
+    wav.writeToFile(_fileName, m_samples);
 }
 
-void Signal::loop(bool enable)
+void Signal::loop(bool _enable)
 {
-    m_buffer->setLoop(enable);
+    m_buffer->setLoop(_enable);
 }
 
 void Signal::play()
@@ -205,6 +211,7 @@ void Signal::pause()
 void Signal::toStart()
 {
     m_buffer->reset();
+    m_buffer->seek(m_cursorSample * 4);
 }
 
 void Signal::toEnd()
@@ -213,9 +220,9 @@ void Signal::toEnd()
 }
 
 
-void Signal::handleStateChanged(QAudio::State newState)
+void Signal::handleStateChanged(QAudio::State _newState)
 {
-    switch (newState) {
+    switch (_newState) {
         case QAudio::IdleState:
             // Finished playing (no more data)
             m_audio->stop();

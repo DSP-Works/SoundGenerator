@@ -66,7 +66,9 @@ SOURCES += \
     UI/WaveFormChunk.cpp \
     UI/WaveFormView.cpp \
     LoopableBuffer.cpp \
-    ActionCycle.cpp
+    ActionCycle.cpp \
+    UI/TimeRuler.cpp \
+    UI/WaveFormScrollBar.cpp
 
 HEADERS += \
     Components/AddComponent.h \
@@ -108,7 +110,9 @@ HEADERS += \
     UI/WaveFormChunk.h \
     UI/WaveFormView.h \
     LoopableBuffer.h \
-    ActionCycle.h
+    ActionCycle.h \
+    UI/TimeRuler.h \
+    UI/WaveFormScrollBar.h
 
 FORMS += \
     UI/mainwindow.ui
@@ -117,3 +121,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc

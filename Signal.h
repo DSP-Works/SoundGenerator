@@ -37,16 +37,19 @@ public:
     Signal(QObject* parent = nullptr);
     virtual ~Signal() override;
 
-    void setComponent(Component* component) { m_component = component; }
-    Component* component() { return m_component; }
+    inline void setComponent(Component* _component) { m_component = _component; }
+    inline Component* component() { return m_component; }
 
-    void setVolume(qreal volume);
+    void setVolume(qreal _volume);
     qreal volume();
 
-    void setDuration(qreal duration) { m_duration = duration; }
-    qreal duration() { return m_duration; }
+    inline void setDuration(qreal _duration) { m_duration = _duration; }
+    inline qreal duration() { return m_duration; }
     int sampleCount();
-    qint32 getSample(int index);
+    qint32 getSample(int _index);
+    inline int getSampleRate() { return m_sampleRate; }
+    inline int getCursorSample() { return m_cursorSample; }
+    inline void setCursorSample(int _cursorSample) { m_cursorSample = _cursorSample; }
 
 signals:
     void signalChanged();
@@ -59,11 +62,12 @@ public slots:
     void toStart();
     void toEnd();
     void generate();
-    void exportWAV(QString fileName);
-    void loop(bool enable);
+    void exportWAV(QString _fileName);
+    void loop(bool _enable);
+    void setCursorTime(qreal _cursorTime);
 
 private slots:
-    void handleStateChanged(QAudio::State newState);
+    void handleStateChanged(QAudio::State _newState);
 
 private:
     int m_sampleRate;
@@ -72,6 +76,7 @@ private:
     QByteArray* m_samples;
     LoopableBuffer* m_buffer;
     Component* m_component;
+    int m_cursorSample;
 };
 
 
